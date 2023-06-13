@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useForm } from "react-hook-form";
 export default function ArticulosRegistro({
   AccionABMC,
   ArticulosFamilias,
@@ -6,9 +7,16 @@ export default function ArticulosRegistro({
   Grabar,
   Volver,
 }) {
-  if (!Item) return null;
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, touchedFields, isValid, isSubmitted },
+  } = useForm({ values: Item });
+  const onSubmit = (data) => {
+    Grabar(data);
+  };
   return (
-    <form>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <div className="container-fluid">
         <fieldset disabled={AccionABMC === "C"}>
           {/* campo nombre */}
@@ -21,11 +29,27 @@ export default function ArticulosRegistro({
             <div className="col-sm-8 col-md-6">
               <input
                 type="text"
-                name="Nombre"
-                value={Item?.Nombre}
+                {...register("Nombre", {
+                  required: { value: true, message: "Nombre es requerido" },
+                  minLength: {
+                    value: 4,
+                    message: "Nombre debe tener al menos 4 caracteres",
+                  },
+                  maxLength: {
+                    value: 55,
+                    message: "Nombre debe tener como máximo 55 caracteres",
+                  },
+                })}
                 autoFocus
-                className="form-control "
+                className={
+                  "form-control " + (errors?.Nombre ? "is-invalid" : "")
+                }
               />
+              {errors?.Nombre && touchedFields.Nombre && (
+                <div className="invalid-feedback">
+                  {errors?.Nombre?.message}
+                </div>
+              )}
             </div>
           </div>
           {/* campo Precio */}
@@ -39,10 +63,22 @@ export default function ArticulosRegistro({
               <input
                 type="number"
                 step=".01"
-                name="Precio"
-                value={Item.Precio}
-                className="form-control"
+                {...register("Precio", {
+                  required: { value: true, message: "Precio es requerido" },
+                  min: {
+                    value: 0.01,
+                    message: "Precio debe ser mayor a 0",
+                  },
+                  max: {
+                    value: 99999.99,
+                    message: "Precio debe ser menor o igual a 99999.99",
+                  },
+                })}
+                className={
+                  "form-control " + (errors?.Precio ? "is-invalid" : "")
+                }
               />
+              <div className="invalid-feedback">{errors?.Precio?.message}</div>
             </div>
           </div>
           {/* campo Stock */}
@@ -55,10 +91,22 @@ export default function ArticulosRegistro({
             <div className="col-sm-8 col-md-6">
               <input
                 type="number"
-                name="Stock"
-                value={Item.Stock}
-                className="form-control"
+                {...register("Stock", {
+                  required: { value: true, message: "Stock es requerido" },
+                  min: {
+                    value: 0,
+                    message: "Stock debe ser mayor a 0",
+                  },
+                  max: {
+                    value: 99999,
+                    message: "Stock debe ser menor o igual a 999999",
+                  },
+                })}
+                className={
+                  "form-control " + (errors?.Stock ? "is-invalid" : "")
+                }
               />
+              <div className="invalid-feedback">{errors?.Stock?.message}</div>
             </div>
           </div>
           {/* campo CodigoDeBarra */}
@@ -71,13 +119,27 @@ export default function ArticulosRegistro({
             <div className="col-sm-8 col-md-6">
               <input
                 type="text"
-                name="CodigoDeBarra"
-                value={Item.CodigoDeBarra}
-                className="form-control"
+                {...register("CodigoDeBarra", {
+                  required: {
+                    value: true,
+                    message: "Codigo De Barra es requerido",
+                  },
+                  pattern: {
+                    value: /^[0-9]{13}$/,
+                    message:
+                      "Codigo De Barra debe ser un número, de 13 dígitos",
+                  },
+                })}
+                className={
+                  "form-control" + (errors?.CodigoDeBarra ? " is-invalid" : "")
+                }
               />
+              <div className="invalid-feedback">
+                {errors?.CodigoDeBarra?.message}
+              </div>
             </div>
           </div>
-          {/* campo idarticulofamilia */}
+          {/* campo IdArticuloFamilia */}
           <div className="row">
             <div className="col-sm-4 col-md-3 offset-md-1">
               <label className="col-form-label" htmlFor="IdArticuloFamilia">
@@ -86,9 +148,13 @@ export default function ArticulosRegistro({
             </div>
             <div className="col-sm-8 col-md-6">
               <select
-                name="IdArticuloFamilia"
-                className="form-control"
-                value={Item?.IdArticuloFamilia}
+                {...register("IdArticuloFamilia", {
+                  required: { value: true, message: "Familia es requerido" },
+                })}
+                className={
+                  "form-control " +
+                  (errors?.IdArticuloFamilia ? "is-invalid" : "")
+                }
               >
                 <option value="" key={1}></option>
                 {ArticulosFamilias?.map((x) => (
@@ -97,6 +163,9 @@ export default function ArticulosRegistro({
                   </option>
                 ))}
               </select>
+              <div className="invalid-feedback">
+                {errors?.IdArticuloFamilia?.message}
+              </div>
             </div>
           </div>
           {/* campo FechaAlta */}
@@ -109,10 +178,16 @@ export default function ArticulosRegistro({
             <div className="col-sm-8 col-md-6">
               <input
                 type="date"
-                name="FechaAlta"
-                className="form-control"
-                value={Item?.FechaAlta}
+                {...register("FechaAlta", {
+                  required: { value: true, message: "Fecha Alta es requerido" },
+                })}
+                className={
+                  "form-control " + (errors?.FechaAlta ? "is-invalid" : "")
+                }
               />
+              <div className="invalid-feedback">
+                {errors?.FechaAlta?.message}
+              </div>
             </div>
           </div>
           {/* campo Activo */}
@@ -125,14 +200,19 @@ export default function ArticulosRegistro({
             <div className="col-sm-8 col-md-6">
               <select
                 name="Activo"
-                className="form-control"
-                value={Item?.Activo}
+                {...register("Activo", {
+                  required: { value: true, message: "Activo es requerido" },
+                })}
+                className={
+                  "form-control" + (errors?.Activo ? " is-invalid" : "")
+                }
                 disabled
               >
                 <option value={null}></option>
                 <option value={false}>NO</option>
                 <option value={true}>SI</option>
               </select>
+              <div className="invalid-feedback">{errors?.Activo?.message}</div>
             </div>
           </div>
         </fieldset>
@@ -156,10 +236,12 @@ export default function ArticulosRegistro({
           </div>
         </div>
         {/* texto: Revisar los datos ingresados... */}
-        <div className="row alert alert-danger mensajesAlert">
-          <i className="fa fa-exclamation-sign"></i>
-          Revisar los datos ingresados...
-        </div>
+        {!isValid && isSubmitted && (
+          <div className="row alert alert-danger mensajesAlert">
+            <i className="fa fa-exclamation-sign"></i>
+            Revisar los datos ingresados...
+          </div>
+        )}
       </div>
     </form>
   );
